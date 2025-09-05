@@ -16,6 +16,11 @@ import { RepositoryTools } from '../commands/repository/index.js';
 import { StatusTools } from '../commands/status/index.js';
 import { CommitTools } from '../commands/commits/index.js';
 import { BranchTools } from '../commands/branches/index.js';
+import { GitHubTools } from '../commands/github/index.js';
+import { GitKrakenTools } from '../commands/gitkraken/index.js';
+import { InstallerTools } from '../commands/installer/index.js';
+import { RecoveryTools } from '../commands/recovery/index.js';
+import { TagTools } from '../commands/tags/index.js';
 
 export class GitForMeDearAiServer {
   private server: Server;
@@ -31,7 +36,6 @@ export class GitForMeDearAiServer {
     this.tools = new Map();
     this.context = this.initializeContext();
     this.setupHandlers();
-    this.registerTools();
   }
 
   private initializeContext(): McpServerContext {
@@ -85,15 +89,32 @@ export class GitForMeDearAiServer {
       try {
         const result = await tool.execute(this.context, args);
         logger.info(`✅ Tool '${name}' executed successfully`);
-        
-        // Return proper MCP format
+
+        // Return enhanced MCP format with better formatting
+        let responseText;
+        if (result.success) {
+          responseText = `✅ ${result.message}\n\n`;
+          if (result.data) {
+            if (typeof result.data === 'object') {
+              responseText += `**Data:**\n\`\`\`json\n${JSON.stringify(result.data, null, 2)}\n\`\`\``;
+            } else {
+              responseText += `**Result:** ${result.data}`;
+            }
+          }
+        } else {
+          responseText = `❌ ${result.message}`;
+          if (result.error) {
+            responseText += `\n\n**Error:** ${result.error}`;
+          }
+        }
+
         return {
           content: [
             {
-              type: "text",
-              text: JSON.stringify(result, null, 2)
-            }
-          ]
+              type: 'text',
+              text: responseText,
+            },
+          ],
         };
       } catch (error) {
         logger.error(`❌ Tool '${name}' failed:`, error);
@@ -105,7 +126,7 @@ export class GitForMeDearAiServer {
     });
   }
 
-  private registerTools(): void {
+  private async registerTools(): Promise<void> {
     logger.info('🔧 Registering MCP tools...');
 
     // Repository Management Tools
@@ -136,6 +157,42 @@ export class GitForMeDearAiServer {
       logger.info(`  🌿 ${tool.name} - ${tool.description}`);
     });
 
+    // GitHub CLI Tools
+    const githubTools = new GitHubTools();
+    githubTools.getTools().forEach((tool) => {
+      this.tools.set(tool.name, tool);
+      logger.info(`  🐙 ${tool.name} - ${tool.description}`);
+    });
+
+    // GitKraken CLI Tools (optional - only if available)
+    const gitKrakenTools = new GitKrakenTools();
+    const krakenTools = await gitKrakenTools.getTools();
+    krakenTools.forEach((tool) => {
+      this.tools.set(tool.name, tool);
+      logger.info(`  🐙✨ ${tool.name} - ${tool.description}`);
+    });
+
+    // Installation Tools
+    const installerTools = new InstallerTools();
+    installerTools.getTools().forEach((tool) => {
+      this.tools.set(tool.name, tool);
+      logger.info(`  📦 ${tool.name} - ${tool.description}`);
+    });
+
+    // Recovery & History Tools
+    const recoveryTools = new RecoveryTools();
+    recoveryTools.getTools().forEach((tool) => {
+      this.tools.set(tool.name, tool);
+      logger.info(`  🔄 ${tool.name} - ${tool.description}`);
+    });
+
+    // Tag Management Tools
+    const tagTools = new TagTools();
+    tagTools.getTools().forEach((tool) => {
+      this.tools.set(tool.name, tool);
+      logger.info(`  🏷️ ${tool.name} - ${tool.description}`);
+    });
+
     logger.info(`✅ Registered ${this.tools.size} tools total`);
   }
 
@@ -144,6 +201,10 @@ export class GitForMeDearAiServer {
 
     logger.info(chalk.green('🚀 Starting GitForMeDearAi MCP Server...'));
     logger.info(`📁 Working directory: ${this.context.workingDirectory}`);
+    
+    // Register tools asynchronously to handle GitKraken detection
+    await this.registerTools();
+    
     logger.info(`🔧 Tools registered: ${this.tools.size}`);
 
     if (this.context.github) {

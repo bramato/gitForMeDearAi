@@ -1,6 +1,6 @@
 {
   "name": "git-for-me-dear-ai",
-  "version": "0.2.0-alpha.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "Complete MCP server for Git and GitHub automation - installable globally with npm",
   "keywords": [
@@ -31,6 +31,13 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:status": "jest tests/unit/status",
+    "test:branches": "jest tests/unit/branches",
+    "test:commits": "jest tests/unit/commits",
+    "test:github": "jest tests/unit/github",
+    "test:all": "./tests/run-tests.sh",
     "lint": "eslint src --ext .ts,.js",
     "lint:fix": "eslint src --ext .ts,.js --fix",
     "format": "prettier --write 'src/**/*.{ts,js,json}'",
