@@ -13,7 +13,7 @@ class Logger {
 
   constructor() {
     this.mcpMode = process.env.MCP_MODE === 'true';
-    
+
     const envLevel = process.env.LOG_LEVEL?.toUpperCase();
     switch (envLevel) {
       case 'ERROR':

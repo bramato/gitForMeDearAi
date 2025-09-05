@@ -10,6 +10,7 @@ export class CommitTools {
       this.createPushTool(),
       this.createPullTool(),
       this.createStashTool(),
+      this.createFetchTool(),
     ];
   }
 
@@ -625,6 +626,169 @@ export class CommitTools {
           return {
             success: false,
             message: `Failed to ${args.action} stash`,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
+      },
+    };
+  }
+
+  private createFetchTool(): McpTool {
+    return {
+      name: 'git_fetch',
+      description: 'Fetch changes from remote repository without merging',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          remote: {
+            type: 'string',
+            description: 'Remote name to fetch from (defaults to origin)',
+            default: 'origin',
+          },
+          branch: {
+            type: 'string',
+            description: 'Specific branch to fetch (fetches all by default)',
+          },
+          all: {
+            type: 'boolean',
+            description: 'Fetch from all remotes',
+            default: false,
+          },
+          tags: {
+            type: 'boolean',
+            description: 'Fetch tags as well',
+            default: true,
+          },
+          prune: {
+            type: 'boolean',
+            description: 'Remove remote-tracking branches that no longer exist',
+            default: false,
+          },
+          depth: {
+            type: 'number',
+            description: 'Limit fetching to specified number of commits',
+          },
+          force: {
+            type: 'boolean',
+            description: 'Force fetch (overwrite local refs)',
+            default: false,
+          },
+          dryRun: {
+            type: 'boolean',
+            description: 'Show what would be fetched without fetching',
+            default: false,
+          },
+          quiet: {
+            type: 'boolean',
+            description: 'Suppress output except for errors',
+            default: false,
+          },
+          verbose: {
+            type: 'boolean',
+            description: 'Show detailed fetch information',
+            default: false,
+          },
+        },
+      },
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
+        try {
+          const { 
+            remote = 'origin', 
+            branch, 
+            all = false, 
+            tags = true, 
+            prune = false,
+            depth,
+            force = false,
+            dryRun = false,
+            quiet = false,
+            verbose = false 
+          } = args;
+
+          logger.info(`📥 Fetching from ${all ? 'all remotes' : remote}${branch ? ` branch ${branch}` : ''}`, {
+            remote,
+            branch,
+            all,
+            tags,
+            prune,
+            depth,
+            force,
+            dryRun,
+          });
+
+          const fetchArgs: string[] = ['fetch'];
+
+          // Add options
+          if (dryRun) fetchArgs.push('--dry-run');
+          if (force) fetchArgs.push('--force');
+          if (prune) fetchArgs.push('--prune');
+          if (tags) fetchArgs.push('--tags');
+          if (quiet) fetchArgs.push('--quiet');
+          if (verbose) fetchArgs.push('--verbose');
+          if (depth) fetchArgs.push('--depth', depth.toString());
+
+          // Add remote and branch
+          if (all) {
+            fetchArgs.push('--all');
+          } else {
+            fetchArgs.push(remote);
+            if (branch) {
+              fetchArgs.push(branch);
+            }
+          }
+
+          // Get current state before fetch
+          const beforeBranches = await context.git.branch(['-r']);
+
+          // Execute fetch
+          const fetchResult = await context.git.raw(fetchArgs);
+
+          // Get state after fetch
+          const afterBranches = await context.git.branch(['-r']);
+
+          // Analyze what was fetched
+          const beforeBranchNames = Object.keys(beforeBranches.branches);
+          const afterBranchNames = Object.keys(afterBranches.branches);
+          
+          const newBranches = afterBranchNames.filter(b => !beforeBranchNames.includes(b));
+          const updatedBranches = afterBranchNames.filter(b => {
+            if (!beforeBranches.branches[b] || !afterBranches.branches[b]) return false;
+            return beforeBranches.branches[b].commit !== afterBranches.branches[b].commit;
+          });
+
+          const action = dryRun ? 'would fetch' : 'fetched';
+          const summary = {
+            newBranches: newBranches.length,
+            updatedBranches: updatedBranches.length,
+          };
+
+          let message = `Successfully ${action} from ${all ? 'all remotes' : remote}`;
+          if (summary.newBranches > 0) message += `, ${summary.newBranches} new branches`;
+          if (summary.updatedBranches > 0) message += `, ${summary.updatedBranches} updated branches`;
+
+          logger.success(`✅ ${message}`);
+
+          return {
+            success: true,
+            message,
+            data: {
+              remote: all ? 'all' : remote,
+              branch: branch || 'all',
+              summary,
+              newBranches,
+              updatedBranches,
+              dryRun,
+              output: fetchResult.trim(),
+            },
+          };
+        } catch (error) {
+          logger.error(`❌ Failed to fetch from ${args.all ? 'all remotes' : args.remote}:`, error);
+          return {
+            success: false,
+            message: `Failed to fetch from ${args.all ? 'all remotes' : args.remote}`,
             error: error instanceof Error ? error.message : 'Unknown error',
           };
         }
