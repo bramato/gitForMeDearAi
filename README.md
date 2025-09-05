@@ -25,6 +25,113 @@ npm install -g git-for-me-dear-ai
 git-for-me-dear-ai --version
 ```
 
+## 🔧 Configurazione MCP Client
+
+### 🎯 **Cursor IDE**
+
+1. **Apri le impostazioni MCP** in Cursor:
+   ```
+   Cursor → Preferences → Features → Model Context Protocol
+   ```
+
+2. **Aggiungi il server GitForMeDearAi** nel file di configurazione MCP:
+   ```json
+   {
+     "mcpServers": {
+       "git-for-me-dear-ai": {
+         "command": "node",
+         "args": [
+           "/path/to/your/global/node_modules/git-for-me-dear-ai/dist/index.js"
+         ],
+         "env": {
+           "GITHUB_TOKEN": "your-github-token-here"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Trova il percorso dell'installazione globale**:
+   ```bash
+   npm list -g git-for-me-dear-ai
+   # O usa: npm root -g
+   ```
+
+4. **Riavvia Cursor** per caricare il server MCP
+
+### 🎯 **Claude Code**
+
+1. **Installa il server** globalmente:
+   ```bash
+   npm install -g git-for-me-dear-ai
+   ```
+
+2. **Aggiungi al file di configurazione MCP** (`~/.config/claude-code/mcp.json`):
+   ```json
+   {
+     "servers": {
+       "git-for-me-dear-ai": {
+         "command": "git-for-me-dear-ai",
+         "args": ["start"],
+         "env": {
+           "GITHUB_TOKEN": "ghp_your_github_token_here",
+           "LOG_LEVEL": "INFO"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Configura il token GitHub** (opzionale per funzioni GitHub):
+   ```bash
+   # Metodo 1: Environment variable
+   export GITHUB_TOKEN="ghp_your_github_token_here"
+   
+   # Metodo 2: Config file
+   echo '{"githubToken": "ghp_your_token_here"}' > ~/.gitformeDearai.json
+   ```
+
+4. **Verifica la configurazione**:
+   ```bash
+   git-for-me-dear-ai config --show
+   git-for-me-dear-ai tools --category repository
+   ```
+
+### 🎯 **Altri Client MCP**
+
+Per altri client che supportano MCP, usa questa configurazione base:
+
+```json
+{
+  "name": "git-for-me-dear-ai",
+  "command": "git-for-me-dear-ai",
+  "args": ["start"],
+  "env": {
+    "GITHUB_TOKEN": "optional_github_token"
+  }
+}
+```
+
+### 🔐 **Setup Token GitHub** (Opzionale)
+
+Per utilizzare le funzionalità GitHub:
+
+1. **Crea un Personal Access Token** su GitHub:
+   - Vai su GitHub → Settings → Developer settings → Personal access tokens
+   - Genera un nuovo token con scope: `repo`, `issues`, `pull_requests`
+
+2. **Configura il token**:
+   ```bash
+   # Opzione 1: Environment variable (raccomandato)
+   export GITHUB_TOKEN="ghp_your_token_here"
+   
+   # Opzione 2: Config file locale
+   echo '{"githubToken": "ghp_your_token_here"}' > .gitformeDearai.json
+   
+   # Opzione 3: Config file globale
+   echo '{"githubToken": "ghp_your_token_here"}' > ~/.gitformeDearai.json
+   ```
+
 ## 🎯 Categorie di Comandi
 
 ### 🔥 **Priorità Alta** (Workflow Quotidiani)
@@ -88,32 +195,57 @@ git-for-me-dear-ai --version
 - Repository optimization
 - Backup e sync
 
-## 💻 Esempio di Utilizzo
+## 💻 Esempi di Utilizzo
 
-```javascript
-// Tramite MCP client
-const gitMcp = new GitForMeDearAi();
+### 🎯 Tramite Client MCP (Cursor, Claude Code)
 
-// Inizializza nuovo repository
-await gitMcp.repository.init({
-  name: "my-project",
-  description: "Il mio nuovo progetto",
-  private: true
-});
+Una volta configurato, puoi usare comandi naturali:
 
-// Commit con convenzioni
-await gitMcp.commit.create({
-  message: "✨ feat: aggiunge nuova feature",
-  files: ["src/feature.js"]
-});
-
-// Crea pull request
-await gitMcp.pullRequest.create({
-  title: "Nuova feature incredibile",
-  base: "main",
-  head: "feature/awesome"
-});
 ```
+"Inizializza un nuovo repository Git in questa directory"
+→ Usa: git_init
+
+"Mostra lo stato del repository con dettagli sui file modificati"
+→ Usa: git_status
+
+"Crea un commit con il messaggio 'feat: add new authentication system'"
+→ Usa: git_commit con convenzioni
+
+"Crea un nuovo branch chiamato 'feature/user-dashboard'"
+→ Usa: git_branch_create
+
+"Pusha i miei cambiamenti su origin main"
+→ Usa: git_push
+
+"Mostra la cronologia degli ultimi 5 commit con dettagli"
+→ Usa: git_log
+
+"Merge del branch feature/awesome nel branch corrente"
+→ Usa: git_merge
+```
+
+### 🔧 Tramite CLI Standalone
+
+```bash
+# Avvia il server MCP
+git-for-me-dear-ai start
+
+# Mostra tutti i tool disponibili
+git-for-me-dear-ai tools
+
+# Mostra solo i tool per i commit
+git-for-me-dear-ai tools --category commits
+
+# Verifica la configurazione
+git-for-me-dear-ai config --show
+```
+
+### 📋 Tool Disponibili per Categoria
+
+- **Repository**: `git_init`, `git_clone`, `git_remote`, `git_config`
+- **Status**: `git_status`, `git_log`, `git_diff`, `git_blame`, `git_show`
+- **Commits**: `git_add`, `git_commit`, `git_push`, `git_pull`, `git_stash`
+- **Branches**: `git_branch_list`, `git_branch_create`, `git_branch_switch`, `git_branch_delete`, `git_merge`
 
 ## 🏗️ Architettura
 
@@ -151,10 +283,11 @@ npm run test:integration
 
 ## 📖 Documentazione
 
-- 📚 [Guida Completa](./docs/guide.md)
-- 🔧 [Riferimento API](./docs/api.md)
-- 💡 [Esempi](./docs/examples.md)
-- 🐛 [Troubleshooting](./docs/troubleshooting.md)
+- 🔧 [Setup MCP Client](./docs/mcp-setup.md) - Configurazione completa per Cursor, Claude Code e altri client
+- 📚 [Guida Completa](./docs/guide.md) - Guida dettagliata all'uso
+- 🔧 [Riferimento API](./docs/api.md) - Documentazione API completa
+- 💡 [Esempi Pratici](./docs/examples.md) - Esempi di workflow
+- 🐛 [Troubleshooting](./docs/troubleshooting.md) - Risoluzione problemi comuni
 
 ## 🤝 Contribuire
 
