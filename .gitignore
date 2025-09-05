@@ -82,3 +82,8 @@ temp/
 .github-token
 .auth-tokens
 auth.json
+CLAUDE.md
+
+.claude/
+
+cache/
