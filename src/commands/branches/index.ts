@@ -1,4 +1,8 @@
-import { McpServerContext, GitCommandResult, GitBranch } from '../../types/index.js';
+import {
+  McpServerContext,
+  GitCommandResult,
+  GitBranch,
+} from '../../types/index.js';
 import { logger } from '../../utils/logger.js';
 import { McpTool } from '../repository/index.js';
 
@@ -16,7 +20,8 @@ export class BranchTools {
   private createBranchListTool(): McpTool {
     return {
       name: 'git_branch_list',
-      description: 'List Git branches with detailed information including remote tracking',
+      description:
+        'List Git branches with detailed information including remote tracking',
       inputSchema: {
         type: 'object',
         properties: {
@@ -47,29 +52,38 @@ export class BranchTools {
           },
         },
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { includeRemote, all, verbose, merged, noMerged } = args;
-          
-          logger.info('🌿 Listing branches', { includeRemote, all, verbose, merged, noMerged });
+
+          logger.info('🌿 Listing branches', {
+            includeRemote,
+            all,
+            verbose,
+            merged,
+            noMerged,
+          });
 
           const branchArgs: string[] = [];
-          
+
           if (all) branchArgs.push('-a');
           else if (includeRemote) branchArgs.push('-r');
-          
+
           if (verbose) branchArgs.push('-v');
           if (merged) branchArgs.push('--merged');
           if (noMerged) branchArgs.push('--no-merged');
 
           const branchList = await context.git.branch(branchArgs);
-          
+
           // Parse branches into structured format
           const branches: GitBranch[] = [];
           const currentBranch = branchList.current;
-          
+
           // Process local branches
-          Object.keys(branchList.branches).forEach(branchName => {
+          Object.keys(branchList.branches).forEach((branchName) => {
             const branch = branchList.branches[branchName];
             branches.push({
               name: branchName,
@@ -84,12 +98,26 @@ export class BranchTools {
           // Get ahead/behind information for current branch
           if (currentBranch) {
             try {
-              const upstream = await context.git.raw(['rev-parse', '--abbrev-ref', '@{upstream}']);
+              const upstream = await context.git.raw([
+                'rev-parse',
+                '--abbrev-ref',
+                '@{upstream}',
+              ]);
               if (upstream.trim()) {
-                const aheadBehind = await context.git.raw(['rev-list', '--left-right', '--count', `${upstream.trim()}...HEAD`]);
-                const [behind, ahead] = aheadBehind.trim().split('\t').map(Number);
-                
-                const currentBranchInfo = branches.find(b => b.name === currentBranch);
+                const aheadBehind = await context.git.raw([
+                  'rev-list',
+                  '--left-right',
+                  '--count',
+                  `${upstream.trim()}...HEAD`,
+                ]);
+                const [behind, ahead] = aheadBehind
+                  .trim()
+                  .split('\t')
+                  .map(Number);
+
+                const currentBranchInfo = branches.find(
+                  (b) => b.name === currentBranch
+                );
                 if (currentBranchInfo) {
                   currentBranchInfo.ahead = ahead || 0;
                   currentBranchInfo.behind = behind || 0;
@@ -136,7 +164,8 @@ export class BranchTools {
           },
           startPoint: {
             type: 'string',
-            description: 'Starting point for new branch (commit, branch, or tag)',
+            description:
+              'Starting point for new branch (commit, branch, or tag)',
           },
           checkout: {
             type: 'boolean',
@@ -156,17 +185,25 @@ export class BranchTools {
         },
         required: ['name'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { name, startPoint, checkout, track, force } = args;
-          
-          logger.info(`🌱 Creating branch '${name}'`, { startPoint, checkout, track, force });
+
+          logger.info(`🌱 Creating branch '${name}'`, {
+            startPoint,
+            checkout,
+            track,
+            force,
+          });
 
           const branchArgs: string[] = [];
-          
+
           if (force) branchArgs.push('-f');
           if (track) branchArgs.push('--track');
-          
+
           branchArgs.push(name);
           if (startPoint) branchArgs.push(startPoint);
 
@@ -207,7 +244,8 @@ export class BranchTools {
   private createBranchSwitchTool(): McpTool {
     return {
       name: 'git_branch_switch',
-      description: 'Switch between Git branches with optional creation and stash handling',
+      description:
+        'Switch between Git branches with optional creation and stash handling',
       inputSchema: {
         type: 'object',
         properties: {
@@ -217,7 +255,7 @@ export class BranchTools {
           },
           create: {
             type: 'boolean',
-            description: 'Create the branch if it doesn\'t exist (-b)',
+            description: "Create the branch if it doesn't exist (-b)",
             default: false,
           },
           force: {
@@ -242,36 +280,50 @@ export class BranchTools {
         },
         required: ['name'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { name, create, force, stash, track, startPoint } = args;
-          
-          logger.info(`🔄 Switching to branch '${name}'`, { create, force, stash, track });
+
+          logger.info(`🔄 Switching to branch '${name}'`, {
+            create,
+            force,
+            stash,
+            track,
+          });
 
           // Handle stashing if requested
           let stashed = false;
           if (stash) {
             const status = await context.git.status();
             if (status.files.length > 0) {
-              await context.git.stash(['push', '-m', `Auto-stash before switching to ${name}`]);
+              await context.git.stash([
+                'push',
+                '-m',
+                `Auto-stash before switching to ${name}`,
+              ]);
               stashed = true;
               logger.info('📦 Changes stashed automatically');
             }
           }
 
           const checkoutArgs: string[] = [];
-          
+
           if (create) checkoutArgs.push('-b');
           if (force) checkoutArgs.push('-f');
           if (track && create) checkoutArgs.push('--track');
-          
+
           checkoutArgs.push(name);
           if (startPoint && create) checkoutArgs.push(startPoint);
 
           // Switch/create branch
           await context.git.checkout(checkoutArgs);
 
-          logger.success(`✅ Switched to branch '${name}'${create ? ' (created)' : ''}`);
+          logger.success(
+            `✅ Switched to branch '${name}'${create ? ' (created)' : ''}`
+          );
 
           return {
             success: true,
@@ -326,56 +378,84 @@ export class BranchTools {
         },
         required: ['names'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { names, force, remote, dryRun } = args;
-          
-          logger.info(`🗑️ Deleting branches: ${names.join(', ')}`, { force, remote, dryRun });
 
-          const results: Array<{ name: string; success: boolean; error?: string }> = [];
+          logger.info(`🗑️ Deleting branches: ${names.join(', ')}`, {
+            force,
+            remote,
+            dryRun,
+          });
+
+          const results: Array<{
+            name: string;
+            success: boolean;
+            error?: string;
+          }> = [];
 
           for (const branchName of names) {
             try {
               if (dryRun) {
                 // Check if branch exists and is merged
                 const branches = await context.git.branch();
-                const branchExists = Object.keys(branches.branches).includes(branchName);
-                
+                const branchExists = Object.keys(branches.branches).includes(
+                  branchName
+                );
+
                 if (!branchExists) {
-                  results.push({ name: branchName, success: false, error: 'Branch does not exist' });
+                  results.push({
+                    name: branchName,
+                    success: false,
+                    error: 'Branch does not exist',
+                  });
                   continue;
                 }
 
                 const currentBranch = branches.current;
                 if (branchName === currentBranch) {
-                  results.push({ name: branchName, success: false, error: 'Cannot delete current branch' });
+                  results.push({
+                    name: branchName,
+                    success: false,
+                    error: 'Cannot delete current branch',
+                  });
                   continue;
                 }
 
                 results.push({ name: branchName, success: true });
               } else {
                 const deleteArgs: string[] = [];
-                
+
                 if (remote) deleteArgs.push('-r');
                 if (force) deleteArgs.push('-D');
                 else deleteArgs.push('-d');
-                
+
                 deleteArgs.push(branchName);
 
                 await context.git.raw(['branch', ...deleteArgs]);
                 results.push({ name: branchName, success: true });
-                
+
                 logger.info(`✅ Deleted branch '${branchName}'`);
               }
             } catch (error) {
-              const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-              results.push({ name: branchName, success: false, error: errorMsg });
-              logger.warn(`⚠️ Failed to delete branch '${branchName}': ${errorMsg}`);
+              const errorMsg =
+                error instanceof Error ? error.message : 'Unknown error';
+              results.push({
+                name: branchName,
+                success: false,
+                error: errorMsg,
+              });
+              logger.warn(
+                `⚠️ Failed to delete branch '${branchName}': ${errorMsg}`
+              );
             }
           }
 
-          const successCount = results.filter(r => r.success).length;
-          const message = dryRun 
+          const successCount = results.filter((r) => r.success).length;
+          const message = dryRun
             ? `Would delete ${successCount}/${names.length} branches`
             : `Deleted ${successCount}/${names.length} branches`;
 
@@ -433,7 +513,7 @@ export class BranchTools {
           },
           noCommit: {
             type: 'boolean',
-            description: 'Don\'t create merge commit automatically',
+            description: "Don't create merge commit automatically",
             default: false,
           },
           message: {
@@ -453,48 +533,66 @@ export class BranchTools {
         },
         required: ['branch'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
-          const { branch, strategy, ff, squash, noCommit, message, abort, continue: continueFlag } = args;
-          
+          const {
+            branch,
+            strategy,
+            ff,
+            squash,
+            noCommit,
+            message,
+            abort,
+            continue: continueFlag,
+          } = args;
+
           if (abort) {
             logger.info('🚫 Aborting merge');
             await context.git.merge(['--abort']);
-            
+
             return {
               success: true,
               message: 'Merge aborted',
               data: { action: 'abort' },
             };
           }
-          
+
           if (continueFlag) {
             logger.info('▶️ Continuing merge');
             await context.git.merge(['--continue']);
-            
+
             return {
               success: true,
               message: 'Merge continued',
               data: { action: 'continue' },
             };
           }
-          
-          logger.info(`🔀 Merging branch '${branch}'`, { strategy, ff, squash, noCommit });
+
+          logger.info(`🔀 Merging branch '${branch}'`, {
+            strategy,
+            ff,
+            squash,
+            noCommit,
+          });
 
           const mergeArgs: string[] = [];
-          
-          if (strategy && strategy !== 'recursive') mergeArgs.push('-s', strategy);
+
+          if (strategy && strategy !== 'recursive')
+            mergeArgs.push('-s', strategy);
           if (ff === 'only') mergeArgs.push('--ff-only');
           if (ff === 'no') mergeArgs.push('--no-ff');
           if (squash) mergeArgs.push('--squash');
           if (noCommit) mergeArgs.push('--no-commit');
           if (message) mergeArgs.push('-m', message);
-          
+
           mergeArgs.push(branch);
 
           try {
             const result = await context.git.merge(mergeArgs);
-            
+
             logger.success(`✅ Successfully merged '${branch}'`);
 
             return {
@@ -512,8 +610,10 @@ export class BranchTools {
             // Check if it's a merge conflict
             const status = await context.git.status();
             if (status.conflicted.length > 0) {
-              logger.warn(`⚠️ Merge conflicts detected in ${status.conflicted.length} files`);
-              
+              logger.warn(
+                `⚠️ Merge conflicts detected in ${status.conflicted.length} files`
+              );
+
               return {
                 success: false,
                 message: `Merge conflicts detected in ${status.conflicted.length} files`,
@@ -524,7 +624,7 @@ export class BranchTools {
                 },
               };
             }
-            
+
             throw error;
           }
         } catch (error) {

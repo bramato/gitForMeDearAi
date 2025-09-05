@@ -1,40 +1,40 @@
 # 🎯 GitForMeDearAi
 
-> Un server MCP (Model Context Protocol) completo per l'automazione di tutti i comandi Git e GitHub, installabile globalmente con npm.
+> A complete MCP (Model Context Protocol) server for automating all Git and GitHub commands, globally installable via npm.
 
-## 🌟 Panoramica
+## 🌟 Overview
 
-**GitForMeDearAi** è un server MCP che fornisce accesso completo a tutti i comandi Git e GitHub attraverso un'interfaccia unificata. Progettato per sviluppatori che vogliono automatizzare i workflow di versioning e collaborazione senza dover ricordare sintassi complesse.
+**GitForMeDearAi** is an MCP server that provides complete access to all Git and GitHub commands through a unified interface. Designed for developers who want to automate versioning and collaboration workflows without having to remember complex syntax.
 
-## 🚀 Caratteristiche Principali
+## 🚀 Key Features
 
-- 🔧 **150+ Comandi Git/GitHub** - Dalla inizializzazione al deployment
-- ⚡ **Installazione Globale** - Un solo comando npm per essere operativi
-- 🎨 **Zero Configuration** - Funziona immediatamente dopo l'installazione
-- 🔒 **Gestione Sicura** - Autenticazione GitHub integrata
-- 📋 **Categorizzazione Logica** - Comandi organizzati per workflow
-- 🌐 **Cross-Platform** - Compatibile con Windows, macOS, Linux
+- 🔧 **150+ Git/GitHub Commands** - From initialization to deployment
+- ⚡ **Global Installation** - One npm command to get operational
+- 🎨 **Zero Configuration** - Works immediately after installation
+- 🔒 **Secure Management** - Integrated GitHub authentication
+- 📋 **Logical Categorization** - Commands organized by workflow
+- 🌐 **Cross-Platform** - Compatible with Windows, macOS, Linux
 
-## 📦 Installazione
+## 📦 Installation
 
 ```bash
-# Installazione globale
+# Global installation
 npm install -g git-for-me-dear-ai
 
-# Verifica installazione
+# Verify installation
 git-for-me-dear-ai --version
 ```
 
-## 🔧 Configurazione MCP Client
+## 🔧 MCP Client Configuration
 
 ### 🎯 **Cursor IDE**
 
-1. **Apri le impostazioni MCP** in Cursor:
+1. **Open MCP settings** in Cursor:
    ```
    Cursor → Preferences → Features → Model Context Protocol
    ```
 
-2. **Aggiungi il server GitForMeDearAi** nel file di configurazione MCP:
+2. **Add the GitForMeDearAi server** in the MCP configuration file:
    ```json
    {
      "mcpServers": {
@@ -51,22 +51,22 @@ git-for-me-dear-ai --version
    }
    ```
 
-3. **Trova il percorso dell'installazione globale**:
+3. **Find the global installation path**:
    ```bash
    npm list -g git-for-me-dear-ai
-   # O usa: npm root -g
+   # Or use: npm root -g
    ```
 
-4. **Riavvia Cursor** per caricare il server MCP
+4. **Restart Cursor** to load the MCP server
 
 ### 🎯 **Claude Code**
 
-1. **Installa il server** globalmente:
+1. **Install the server** globally:
    ```bash
    npm install -g git-for-me-dear-ai
    ```
 
-2. **Aggiungi al file di configurazione MCP** (`~/.config/claude-code/mcp.json`):
+2. **Add to the MCP configuration file** (`~/.config/claude-code/mcp.json`):
    ```json
    {
      "servers": {
@@ -82,24 +82,24 @@ git-for-me-dear-ai --version
    }
    ```
 
-3. **Configura il token GitHub** (opzionale per funzioni GitHub):
+3. **Configure GitHub token** (optional for GitHub functions):
    ```bash
-   # Metodo 1: Environment variable
+   # Method 1: Environment variable
    export GITHUB_TOKEN="ghp_your_github_token_here"
    
-   # Metodo 2: Config file
+   # Method 2: Config file
    echo '{"githubToken": "ghp_your_token_here"}' > ~/.gitformeDearai.json
    ```
 
-4. **Verifica la configurazione**:
+4. **Verify the configuration**:
    ```bash
    git-for-me-dear-ai config --show
    git-for-me-dear-ai tools --category repository
    ```
 
-### 🎯 **Altri Client MCP**
+### 🎯 **Other MCP Clients**
 
-Per altri client che supportano MCP, usa questa configurazione base:
+For other clients that support MCP, use this basic configuration:
 
 ```json
 {
@@ -112,147 +112,147 @@ Per altri client che supportano MCP, usa questa configurazione base:
 }
 ```
 
-### 🔐 **Setup Token GitHub** (Opzionale)
+### 🔐 **GitHub Token Setup** (Optional)
 
-Per utilizzare le funzionalità GitHub:
+To use GitHub functionalities:
 
-1. **Crea un Personal Access Token** su GitHub:
-   - Vai su GitHub → Settings → Developer settings → Personal access tokens
-   - Genera un nuovo token con scope: `repo`, `issues`, `pull_requests`
+1. **Create a Personal Access Token** on GitHub:
+   - Go to GitHub → Settings → Developer settings → Personal access tokens
+   - Generate a new token with scopes: `repo`, `issues`, `pull_requests`
 
-2. **Configura il token**:
+2. **Configure the token**:
    ```bash
-   # Opzione 1: Environment variable (raccomandato)
+   # Option 1: Environment variable (recommended)
    export GITHUB_TOKEN="ghp_your_token_here"
    
-   # Opzione 2: Config file locale
+   # Option 2: Local config file
    echo '{"githubToken": "ghp_your_token_here"}' > .gitformeDearai.json
    
-   # Opzione 3: Config file globale
+   # Option 3: Global config file
    echo '{"githubToken": "ghp_your_token_here"}' > ~/.gitformeDearai.json
    ```
 
-## 🎯 Categorie di Comandi
+## 🎯 Command Categories
 
-### 🔥 **Priorità Alta** (Workflow Quotidiani)
+### 🔥 **High Priority** (Daily Workflows)
 
 #### 📁 **Repository Management**
-- Inizializzazione e clonazione repository
-- Gestione remote e configurazione
-- Import/export repository
+- Repository initialization and cloning
+- Remote and configuration management
+- Repository import/export
 
 #### 🌿 **Branch & Merge Operations**
-- Creazione, switch e eliminazione branch
-- Merge, rebase e cherry-pick
-- Gestione conflitti
+- Branch creation, switching and deletion
+- Merge, rebase and cherry-pick
+- Conflict management
 
 #### 💾 **Commit & Push Operations**
-- Add, commit con messaggi strutturati
-- Push/pull con gestione upstream
-- Gestione staging area
+- Add, commit with structured messages
+- Push/pull with upstream management
+- Staging area management
 
 #### 🔍 **Status & Inspection**
-- Status repository e working tree
-- Log, diff e blame
-- File tracking e ignoring
+- Repository and working tree status
+- Log, diff and blame
+- File tracking and ignoring
 
-### ⚡ **Priorità Media** (Funzioni Avanzate)
+### ⚡ **Medium Priority** (Advanced Features)
 
 #### 🐛 **GitHub Issues**
-- Creazione e gestione issues
-- Assegnazione e labeling
-- Milestone e progetti
+- Issue creation and management
+- Assignment and labeling
+- Milestones and projects
 
 #### 🔀 **Pull Requests**
-- Creazione e review PR
+- PR creation and review
 - Merge strategies
-- Draft e conversioni
+- Drafts and conversions
 
 #### 🏷️ **Tags & Releases**
-- Gestione tags e versioning
-- Creazione release
+- Tag and versioning management
+- Release creation
 - Asset management
 
 #### ⏪ **History & Recovery**
-- Reset e revert operations
+- Reset and revert operations
 - Stash management
-- Reflog e recovery
+- Reflog and recovery
 
-### 📋 **Priorità Bassa** (Casi Specialistici)
+### 📋 **Low Priority** (Specialized Cases)
 
 #### 🔧 **Advanced Git**
-- Submodules e subtrees
-- Hooks personalizzati
-- Worktrees multipli
+- Submodules and subtrees
+- Custom hooks
+- Multiple worktrees
 
 #### 🏢 **Enterprise Features**
 - Team management
 - Organization settings
-- Security e compliance
+- Security and compliance
 
 #### 🛠️ **Maintenance**
 - Garbage collection
 - Repository optimization
-- Backup e sync
+- Backup and sync
 
-## 💻 Esempi di Utilizzo
+## 💻 Usage Examples
 
-### 🎯 Tramite Client MCP (Cursor, Claude Code)
+### 🎯 Via MCP Client (Cursor, Claude Code)
 
-Una volta configurato, puoi usare comandi naturali:
+Once configured, you can use natural commands:
 
 ```
-"Inizializza un nuovo repository Git in questa directory"
-→ Usa: git_init
+"Initialize a new Git repository in this directory"
+→ Uses: git_init
 
-"Mostra lo stato del repository con dettagli sui file modificati"
-→ Usa: git_status
+"Show repository status with details about modified files"
+→ Uses: git_status
 
-"Crea un commit con il messaggio 'feat: add new authentication system'"
-→ Usa: git_commit con convenzioni
+"Create a commit with the message 'feat: add new authentication system'"
+→ Uses: git_commit with conventions
 
-"Crea un nuovo branch chiamato 'feature/user-dashboard'"
-→ Usa: git_branch_create
+"Create a new branch called 'feature/user-dashboard'"
+→ Uses: git_branch_create
 
-"Pusha i miei cambiamenti su origin main"
-→ Usa: git_push
+"Push my changes to origin main"
+→ Uses: git_push
 
-"Mostra la cronologia degli ultimi 5 commit con dettagli"
-→ Usa: git_log
+"Show the history of the last 5 commits with details"
+→ Uses: git_log
 
-"Merge del branch feature/awesome nel branch corrente"
-→ Usa: git_merge
+"Merge feature/awesome branch into current branch"
+→ Uses: git_merge
 ```
 
-### 🔧 Tramite CLI Standalone
+### 🔧 Via Standalone CLI
 
 ```bash
-# Avvia il server MCP
+# Start the MCP server
 git-for-me-dear-ai start
 
-# Mostra tutti i tool disponibili
+# Show all available tools
 git-for-me-dear-ai tools
 
-# Mostra solo i tool per i commit
+# Show only commit tools
 git-for-me-dear-ai tools --category commits
 
-# Verifica la configurazione
+# Verify configuration
 git-for-me-dear-ai config --show
 ```
 
-### 📋 Tool Disponibili per Categoria
+### 📋 Available Tools by Category
 
 - **Repository**: `git_init`, `git_clone`, `git_remote`, `git_config`
 - **Status**: `git_status`, `git_log`, `git_diff`, `git_blame`, `git_show`
 - **Commits**: `git_add`, `git_commit`, `git_push`, `git_pull`, `git_stash`
 - **Branches**: `git_branch_list`, `git_branch_create`, `git_branch_switch`, `git_branch_delete`, `git_merge`
 
-## 🏗️ Architettura
+## 🏗️ Architecture
 
 ```
 GitForMeDearAi/
 ├── src/
-│   ├── commands/           # Implementazioni comandi Git/GitHub
+│   ├── commands/           # Git/GitHub command implementations
 │   │   ├── repository/     # Repository operations
 │   │   ├── branches/       # Branch management
 │   │   ├── commits/        # Commit operations
@@ -263,9 +263,9 @@ GitForMeDearAi/
 │   ├── auth/              # GitHub authentication
 │   ├── utils/             # Utility functions
 │   └── index.ts           # Entry point
-├── tests/                 # Test suite completa
-├── docs/                  # Documentazione dettagliata
-└── examples/              # Esempi di utilizzo
+├── tests/                 # Complete test suite
+├── docs/                  # Detailed documentation
+└── examples/              # Usage examples
 ```
 
 ## 🧪 Testing
@@ -281,35 +281,57 @@ npm run test:coverage
 npm run test:integration
 ```
 
-## 📖 Documentazione
+## 📖 Documentation
 
-- 🔧 [Setup MCP Client](./docs/mcp-setup.md) - Configurazione completa per Cursor, Claude Code e altri client
-- 📚 [Guida Completa](./docs/guide.md) - Guida dettagliata all'uso
-- 🔧 [Riferimento API](./docs/api.md) - Documentazione API completa
-- 💡 [Esempi Pratici](./docs/examples.md) - Esempi di workflow
-- 🐛 [Troubleshooting](./docs/troubleshooting.md) - Risoluzione problemi comuni
+- 🔧 [MCP Client Setup](./docs/mcp-setup.md) - Complete configuration for Cursor, Claude Code and other clients
+- 📚 [Complete Guide](./docs/guide.md) - Detailed usage guide
+- 🔧 [API Reference](./docs/api.md) - Complete API documentation
+- 💡 [Practical Examples](./docs/examples.md) - Workflow examples
+- 🐛 [Troubleshooting](./docs/troubleshooting.md) - Common problem resolution
 
-## 🤝 Contribuire
+## 🤝 Contributing
 
-Questo progetto è open source! Contribuzioni benvenute.
+This project is open source! Contributions are welcome.
 
-1. Fork del repository
-2. Crea feature branch (`git checkout -b feature/amazing-feature`)
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m '✨ feat: add amazing feature'`)
 4. Push branch (`git push origin feature/amazing-feature`)
-5. Crea Pull Request
-
-## 📄 Licenza
-
-MIT © 2025 GitForMeDearAi
-
-## 🙏 Crediti
-
-Sviluppato con ❤️ per semplificare il workflow Git/GitHub di ogni sviluppatore.
+5. Create Pull Request
 
 ---
 
-**Pronto per rivoluzionare il tuo workflow Git/GitHub?**
+## 🎵 Support the Developer
+
+**Love coding with chill vibes?** Support this project by listening to my developer album:
+
+### **"Code Chill: Loops of Relaxation"** 🎧
+
+*Perfect background music for your coding sessions*
+
+<div align="center">
+
+[![Listen on Apple Music](https://img.shields.io/badge/Apple_Music-000000?style=for-the-badge&logo=apple-music&logoColor=white)](https://music.apple.com/it/album/code-chill-loops-of-relaxation/1815061487)
+[![Listen on Spotify](https://img.shields.io/badge/Spotify-1DB954?style=for-the-badge&logo=spotify&logoColor=white)](http://open.spotify.com/intl-it/album/0hBmSuyrMWpdazYTMCV0fp?go=1&nd=1&dlsi=ce8dfc8f237340e7)
+[![Listen on YouTube Music](https://img.shields.io/badge/YouTube_Music-FF0000?style=for-the-badge&logo=youtube-music&logoColor=white)](https://music.youtube.com/playlist?list=OLAK5uy_lHyFL4eHr1FAikCrvsQrPYkU3AAX4DM6k)
+
+</div>
+
+*Every stream helps support the development of free tools like this one! 🙏*
+
+</div>
+
+## 📄 License
+
+MIT © 2025 GitForMeDearAi
+
+## 🙏 Credits
+
+Developed with ❤️ to simplify every developer's Git/GitHub workflow.
+
+---
+
+**Ready to revolutionize your Git/GitHub workflow?**
 
 ```bash
 npm install -g git-for-me-dear-ai

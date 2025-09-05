@@ -1,4 +1,8 @@
-import { McpServerContext, GitCommandResult, GitStatus } from '../../types/index.js';
+import {
+  McpServerContext,
+  GitCommandResult,
+  GitStatus,
+} from '../../types/index.js';
 import { logger } from '../../utils/logger.js';
 import { McpTool } from '../repository/index.js';
 
@@ -16,7 +20,8 @@ export class StatusTools {
   private createStatusTool(): McpTool {
     return {
       name: 'git_status',
-      description: 'Get comprehensive Git repository status with staged, unstaged, and untracked files',
+      description:
+        'Get comprehensive Git repository status with staged, unstaged, and untracked files',
       inputSchema: {
         type: 'object',
         properties: {
@@ -42,23 +47,41 @@ export class StatusTools {
           },
         },
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { porcelain, short, branch, showStash } = args;
-          
+
           logger.info('🔍 Getting repository status');
 
           const status = await context.git.status();
-          const currentBranch = await context.git.revparse(['--abbrev-ref', 'HEAD']);
-          
+          const currentBranch = await context.git.revparse([
+            '--abbrev-ref',
+            'HEAD',
+          ]);
+
           // Get ahead/behind info
           let ahead = 0;
           let behind = 0;
           try {
-            const upstream = await context.git.raw(['rev-parse', '--abbrev-ref', '@{upstream}']);
+            const upstream = await context.git.raw([
+              'rev-parse',
+              '--abbrev-ref',
+              '@{upstream}',
+            ]);
             if (upstream) {
-              const aheadBehind = await context.git.raw(['rev-list', '--left-right', '--count', `${upstream.trim()}...HEAD`]);
-              const [behindCount, aheadCount] = aheadBehind.trim().split('\t').map(Number);
+              const aheadBehind = await context.git.raw([
+                'rev-list',
+                '--left-right',
+                '--count',
+                `${upstream.trim()}...HEAD`,
+              ]);
+              const [behindCount, aheadCount] = aheadBehind
+                .trim()
+                .split('\t')
+                .map(Number);
               ahead = aheadCount || 0;
               behind = behindCount || 0;
             }
@@ -125,7 +148,8 @@ export class StatusTools {
   private createLogTool(): McpTool {
     return {
       name: 'git_log',
-      description: 'Get Git commit history with customizable format and filters',
+      description:
+        'Get Git commit history with customizable format and filters',
       inputSchema: {
         type: 'object',
         properties: {
@@ -150,7 +174,8 @@ export class StatusTools {
           },
           since: {
             type: 'string',
-            description: 'Show commits since date (e.g., "2023-01-01", "1 week ago")',
+            description:
+              'Show commits since date (e.g., "2023-01-01", "1 week ago")',
           },
           until: {
             type: 'string',
@@ -166,29 +191,33 @@ export class StatusTools {
           },
         },
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
-          const { maxCount, oneline, graph, author, since, until, grep, path } = args;
-          
+          const { maxCount, oneline, graph, author, since, until, grep, path } =
+            args;
+
           logger.info('📚 Getting commit history', { maxCount, author, since });
 
           const logOptions: any = {};
-          
+
           if (maxCount) logOptions.maxCount = maxCount;
           if (author) logOptions.author = author;
           if (since) logOptions.since = since;
           if (until) logOptions.until = until;
           if (grep) logOptions.grep = grep;
-          
-          let format = oneline ? 'oneline' : undefined;
-          
+
+          const format = oneline ? 'oneline' : undefined;
+
           const logArgs: string[] = [];
           if (graph) logArgs.push('--graph');
           if (format) logArgs.push(`--${format}`);
           if (path) logArgs.push('--', path);
 
           const log = await context.git.log({ ...logOptions, ...logArgs });
-          
+
           const commits = log.all.map((commit: any) => ({
             hash: commit.hash,
             message: commit.message,
@@ -224,7 +253,8 @@ export class StatusTools {
   private createDiffTool(): McpTool {
     return {
       name: 'git_diff',
-      description: 'Show differences between commits, branches, working tree, or staging area',
+      description:
+        'Show differences between commits, branches, working tree, or staging area',
       inputSchema: {
         type: 'object',
         properties: {
@@ -236,7 +266,8 @@ export class StatusTools {
           },
           commit1: {
             type: 'string',
-            description: 'First commit/branch for comparison (required for commit/branch target)',
+            description:
+              'First commit/branch for comparison (required for commit/branch target)',
           },
           commit2: {
             type: 'string',
@@ -263,33 +294,44 @@ export class StatusTools {
           },
         },
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
-          const { target, commit1, commit2, path, nameOnly, stat, contextLines } = args;
-          
+          const {
+            target,
+            commit1,
+            commit2,
+            path,
+            nameOnly,
+            stat,
+            contextLines,
+          } = args;
+
           logger.info('📊 Getting diff', { target, commit1, commit2, path });
 
-          let diffArgs: string[] = [];
-          
+          const diffArgs: string[] = [];
+
           // Set context lines
           if (contextLines !== 3) {
             diffArgs.push(`-U${contextLines}`);
           }
-          
+
           // Format options
           if (nameOnly) diffArgs.push('--name-only');
           if (stat) diffArgs.push('--stat');
-          
+
           // Target-specific logic
           switch (target) {
             case 'working':
               // Diff working tree vs staging area (default)
               break;
-              
+
             case 'staged':
               diffArgs.push('--cached');
               break;
-              
+
             case 'commit':
               if (!commit1) {
                 throw new Error('commit1 is required for commit target');
@@ -300,7 +342,7 @@ export class StatusTools {
                 diffArgs.push(`${commit1}^`, commit1);
               }
               break;
-              
+
             case 'branch':
               if (!commit1) {
                 throw new Error('commit1 is required for branch target');
@@ -312,14 +354,14 @@ export class StatusTools {
               }
               break;
           }
-          
+
           // Add path filter if specified
           if (path) {
             diffArgs.push('--', path);
           }
 
           const diff = await context.git.diff(diffArgs);
-          
+
           logger.success('✅ Diff retrieved successfully');
 
           return {
@@ -349,7 +391,8 @@ export class StatusTools {
   private createBlameTool(): McpTool {
     return {
       name: 'git_blame',
-      description: 'Show line-by-line authorship and commit information for a file',
+      description:
+        'Show line-by-line authorship and commit information for a file',
       inputSchema: {
         type: 'object',
         properties: {
@@ -378,34 +421,39 @@ export class StatusTools {
         },
         required: ['file'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { file, lineStart, lineEnd, showEmail, showLineNumbers } = args;
-          
+
           logger.info(`🔍 Getting blame for ${file}`, { lineStart, lineEnd });
 
           const blameArgs: string[] = [];
-          
+
           if (showEmail) blameArgs.push('-e');
           if (showLineNumbers) blameArgs.push('-n');
-          
+
           if (lineStart && lineEnd) {
             blameArgs.push('-L', `${lineStart},${lineEnd}`);
           } else if (lineStart) {
             blameArgs.push('-L', `${lineStart},+1`);
           }
-          
+
           blameArgs.push(file);
 
           const blame = await context.git.raw(['blame', ...blameArgs]);
-          
+
           // Parse blame output into structured format
           const lines = blame.split('\n').filter((line: string) => line.trim());
           const blameData = lines.map((line: string) => {
             const match = line.match(/^(\w+)\s+\(([^)]+)\)\s+(.*)$/);
             if (match) {
               const [, hash, authorInfo, content] = match;
-              const [author, ...dateParts] = (authorInfo || '').split(/\s+\d{4}-\d{2}-\d{2}/);
+              const [author, ...dateParts] = (authorInfo || '').split(
+                /\s+\d{4}-\d{2}-\d{2}/
+              );
               return {
                 hash: (hash || '').substring(0, 8),
                 author: (author || '').trim(),
@@ -416,7 +464,9 @@ export class StatusTools {
             return { hash: '', author: '', date: '', content: line };
           });
 
-          logger.success(`✅ Blame retrieved for ${file} (${blameData.length} lines)`);
+          logger.success(
+            `✅ Blame retrieved for ${file} (${blameData.length} lines)`
+          );
 
           return {
             success: true,
@@ -424,7 +474,10 @@ export class StatusTools {
             data: {
               file,
               lines: blameData,
-              lineRange: lineStart && lineEnd ? { start: lineStart, end: lineEnd } : null,
+              lineRange:
+                lineStart && lineEnd
+                  ? { start: lineStart, end: lineEnd }
+                  : null,
             },
           };
         } catch (error) {
@@ -448,7 +501,8 @@ export class StatusTools {
         properties: {
           commit: {
             type: 'string',
-            description: 'Commit hash, branch, or tag to show (defaults to HEAD)',
+            description:
+              'Commit hash, branch, or tag to show (defaults to HEAD)',
             default: 'HEAD',
           },
           showDiff: {
@@ -468,20 +522,23 @@ export class StatusTools {
           },
         },
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { commit, showDiff, nameOnly, stat } = args;
-          
+
           logger.info(`🔍 Showing commit details for ${commit}`);
 
           const showArgs: string[] = [commit || 'HEAD'];
-          
+
           if (!showDiff) showArgs.push('--no-patch');
           if (nameOnly) showArgs.push('--name-only');
           if (stat) showArgs.push('--stat');
 
           const show = await context.git.show(showArgs);
-          
+
           // Also get structured commit info
           const log = await context.git.log(['-1', commit || 'HEAD']);
           const commitInfo = log.latest;
@@ -518,62 +575,67 @@ export class StatusTools {
   // Helper methods for formatting status output
   private formatPorcelainStatus(status: GitStatus): string {
     let output = '';
-    
+
     // Branch info
     output += `## ${status.branch}`;
     if (status.ahead > 0) output += `...ahead ${status.ahead}`;
     if (status.behind > 0) output += `...behind ${status.behind}`;
     output += '\n';
-    
+
     // File statuses
-    status.staged.forEach(file => output += `A  ${file}\n`);
-    status.unstaged.forEach(file => output += ` M ${file}\n`);
-    status.untracked.forEach(file => output += `?? ${file}\n`);
-    status.conflicted.forEach(file => output += `UU ${file}\n`);
-    
+    status.staged.forEach((file) => (output += `A  ${file}\n`));
+    status.unstaged.forEach((file) => (output += ` M ${file}\n`));
+    status.untracked.forEach((file) => (output += `?? ${file}\n`));
+    status.conflicted.forEach((file) => (output += `UU ${file}\n`));
+
     return output;
   }
 
   private formatShortStatus(status: GitStatus): string {
-    const total = status.staged.length + status.unstaged.length + status.untracked.length;
+    const total =
+      status.staged.length + status.unstaged.length + status.untracked.length;
     return `On branch ${status.branch} | ${total} changes | ${status.ahead}↑ ${status.behind}↓`;
   }
 
   private formatHumanStatus(status: GitStatus, stashCount: number): string {
     let output = `On branch ${status.branch}\n`;
-    
+
     if (status.ahead > 0 || status.behind > 0) {
       output += `Your branch is `;
-      if (status.ahead > 0) output += `ahead of origin by ${status.ahead} commit${status.ahead > 1 ? 's' : ''}`;
+      if (status.ahead > 0)
+        output += `ahead of origin by ${status.ahead} commit${status.ahead > 1 ? 's' : ''}`;
       if (status.ahead > 0 && status.behind > 0) output += ' and ';
-      if (status.behind > 0) output += `behind by ${status.behind} commit${status.behind > 1 ? 's' : ''}`;
+      if (status.behind > 0)
+        output += `behind by ${status.behind} commit${status.behind > 1 ? 's' : ''}`;
       output += '\n';
     }
-    
+
     if (status.staged.length > 0) {
       output += '\nChanges to be committed:\n';
-      status.staged.forEach(file => output += `  modified: ${file}\n`);
+      status.staged.forEach((file) => (output += `  modified: ${file}\n`));
     }
-    
+
     if (status.unstaged.length > 0) {
       output += '\nChanges not staged for commit:\n';
-      status.unstaged.forEach(file => output += `  modified: ${file}\n`);
+      status.unstaged.forEach((file) => (output += `  modified: ${file}\n`));
     }
-    
+
     if (status.untracked.length > 0) {
       output += '\nUntracked files:\n';
-      status.untracked.forEach(file => output += `  ${file}\n`);
+      status.untracked.forEach((file) => (output += `  ${file}\n`));
     }
-    
+
     if (status.conflicted.length > 0) {
       output += '\nUnmerged paths:\n';
-      status.conflicted.forEach(file => output += `  both modified: ${file}\n`);
+      status.conflicted.forEach(
+        (file) => (output += `  both modified: ${file}\n`)
+      );
     }
-    
+
     if (stashCount > 0) {
       output += `\nYou have ${stashCount} stash${stashCount > 1 ? 'es' : ''}\n`;
     }
-    
+
     return output;
   }
 }

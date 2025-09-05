@@ -28,17 +28,18 @@ async function main(): Promise<void> {
     });
 
     // Display startup banner
-    console.log(chalk.blue.bold(`
+    console.log(
+      chalk.blue.bold(`
 ╔══════════════════════════════════════╗
 ║        GitForMeDearAi v0.1.0         ║
 ║    Complete Git/GitHub MCP Server    ║
 ╚══════════════════════════════════════╝
-`));
+`)
+    );
 
     // Create and start server
     const server = new GitForMeDearAiServer();
     await server.start();
-
   } catch (error) {
     logger.error('💥 Fatal error starting GitForMeDearAi server:', error);
     process.exit(1);

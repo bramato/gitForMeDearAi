@@ -26,13 +26,15 @@ export class RepositoryTools {
   private createInitTool(): McpTool {
     return {
       name: 'git_init',
-      description: 'Initialize a new Git repository with optional configuration',
+      description:
+        'Initialize a new Git repository with optional configuration',
       inputSchema: {
         type: 'object',
         properties: {
           path: {
             type: 'string',
-            description: 'Directory path to initialize (defaults to current directory)',
+            description:
+              'Directory path to initialize (defaults to current directory)',
           },
           bare: {
             type: 'boolean',
@@ -50,46 +52,59 @@ export class RepositoryTools {
           },
         },
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { path, bare, defaultBranch, template } = args;
-          
-          logger.info(`🚀 Initializing Git repository`, { path, bare, defaultBranch });
+
+          logger.info(`🚀 Initializing Git repository`, {
+            path,
+            bare,
+            defaultBranch,
+          });
 
           const initOptions: string[] = [];
-          
+
           if (bare) {
             initOptions.push('--bare');
           }
-          
+
           if (defaultBranch) {
             initOptions.push('--initial-branch', defaultBranch);
           }
-          
+
           if (template) {
             initOptions.push('--template', template);
           }
 
           const targetPath = path || context.workingDirectory;
-          
+
           await context.git.raw(['init', ...initOptions, targetPath]);
 
           // Set basic configuration if not a bare repo
           if (!bare) {
             const gitInPath = context.git.cwd(targetPath);
-            
+
             // Configure default branch
             if (defaultBranch) {
-              await gitInPath.raw(['config', 'init.defaultBranch', defaultBranch]);
+              await gitInPath.raw([
+                'config',
+                'init.defaultBranch',
+                defaultBranch,
+              ]);
             }
-            
+
             // Set basic configuration from context
             if (context.config.autoCommitConventions) {
               await gitInPath.raw(['config', 'commit.template', '.gitmessage']);
             }
           }
 
-          logger.success(`✅ Repository initialized successfully at ${targetPath}`);
+          logger.success(
+            `✅ Repository initialized successfully at ${targetPath}`
+          );
 
           return {
             success: true,
@@ -143,36 +158,46 @@ export class RepositoryTools {
         },
         required: ['url'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { url, directory, branch, depth, recursive } = args;
-          
-          logger.info(`📥 Cloning repository from ${url}`, { directory, branch, depth });
+
+          logger.info(`📥 Cloning repository from ${url}`, {
+            directory,
+            branch,
+            depth,
+          });
 
           const cloneOptions: string[] = [url];
-          
+
           if (directory) {
             cloneOptions.push(directory);
           }
-          
+
           const options: string[] = [];
-          
+
           if (branch) {
             options.push('--branch', branch);
           }
-          
+
           if (depth) {
             options.push('--depth', depth.toString());
           }
-          
+
           if (recursive) {
             options.push('--recursive');
           }
 
           await context.git.raw(['clone', ...options, ...cloneOptions]);
 
-          const targetDir = directory || url.split('/').pop()?.replace('.git', '') || 'repository';
-          
+          const targetDir =
+            directory ||
+            url.split('/').pop()?.replace('.git', '') ||
+            'repository';
+
           logger.success(`✅ Repository cloned successfully to ${targetDir}`);
 
           return {
@@ -200,7 +225,8 @@ export class RepositoryTools {
   private createRemoteTool(): McpTool {
     return {
       name: 'git_remote',
-      description: 'Manage Git remote repositories (add, remove, set-url, list)',
+      description:
+        'Manage Git remote repositories (add, remove, set-url, list)',
       inputSchema: {
         type: 'object',
         properties: {
@@ -225,28 +251,33 @@ export class RepositoryTools {
         },
         required: ['action'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { action, name, url, verbose } = args;
-          
+
           logger.info(`🔗 Managing remote: ${action}`, { name, url });
 
           let result;
-          
+
           switch (action) {
             case 'list':
               const remotes = await context.git.getRemotes(verbose);
               result = remotes;
               break;
-              
+
             case 'add':
               if (!name || !url) {
-                throw new Error('Remote name and URL are required for add action');
+                throw new Error(
+                  'Remote name and URL are required for add action'
+                );
               }
               await context.git.addRemote(name, url);
               result = { name, url, action: 'added' };
               break;
-              
+
             case 'remove':
               if (!name) {
                 throw new Error('Remote name is required for remove action');
@@ -254,23 +285,29 @@ export class RepositoryTools {
               await context.git.removeRemote(name);
               result = { name, action: 'removed' };
               break;
-              
+
             case 'set-url':
               if (!name || !url) {
-                throw new Error('Remote name and URL are required for set-url action');
+                throw new Error(
+                  'Remote name and URL are required for set-url action'
+                );
               }
               await context.git.raw(['remote', 'set-url', name, url]);
               result = { name, url, action: 'url-updated' };
               break;
-              
+
             case 'show':
               if (!name) {
                 throw new Error('Remote name is required for show action');
               }
-              const remoteInfo = await context.git.raw(['remote', 'show', name]);
+              const remoteInfo = await context.git.raw([
+                'remote',
+                'show',
+                name,
+              ]);
               result = { name, info: remoteInfo };
               break;
-              
+
             default:
               throw new Error(`Unknown remote action: ${action}`);
           }
@@ -297,7 +334,8 @@ export class RepositoryTools {
   private createConfigTool(): McpTool {
     return {
       name: 'git_config',
-      description: 'Get or set Git configuration values (user.name, user.email, etc.)',
+      description:
+        'Get or set Git configuration values (user.name, user.email, etc.)',
       inputSchema: {
         type: 'object',
         properties: {
@@ -327,24 +365,32 @@ export class RepositoryTools {
         },
         required: ['action'],
       },
-      execute: async (context: McpServerContext, args: any): Promise<GitCommandResult> => {
+      execute: async (
+        context: McpServerContext,
+        args: any
+      ): Promise<GitCommandResult> => {
         try {
           const { action, key, value, global, system } = args;
-          
-          logger.info(`⚙️ Git config ${action}`, { key, value, global, system });
+
+          logger.info(`⚙️ Git config ${action}`, {
+            key,
+            value,
+            global,
+            system,
+          });
 
           let result;
           const configArgs: string[] = ['config'];
-          
+
           if (global) configArgs.push('--global');
           if (system) configArgs.push('--system');
-          
+
           switch (action) {
             case 'list':
               configArgs.push('--list');
               result = await context.git.raw(configArgs);
               break;
-              
+
             case 'get':
               if (!key) {
                 throw new Error('Configuration key is required for get action');
@@ -352,25 +398,29 @@ export class RepositoryTools {
               configArgs.push(key);
               result = await context.git.raw(configArgs);
               break;
-              
+
             case 'set':
               if (!key || !value) {
-                throw new Error('Configuration key and value are required for set action');
+                throw new Error(
+                  'Configuration key and value are required for set action'
+                );
               }
               configArgs.push(key, value);
               await context.git.raw(configArgs);
               result = { key, value, action: 'set' };
               break;
-              
+
             case 'unset':
               if (!key) {
-                throw new Error('Configuration key is required for unset action');
+                throw new Error(
+                  'Configuration key is required for unset action'
+                );
               }
               configArgs.push('--unset', key);
               await context.git.raw(configArgs);
               result = { key, action: 'unset' };
               break;
-              
+
             default:
               throw new Error(`Unknown config action: ${action}`);
           }

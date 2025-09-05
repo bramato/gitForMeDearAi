@@ -71,9 +71,9 @@ export class GitForMeDearAiServer {
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      
+
       logger.info(`🔧 Executing tool: ${chalk.blue(name)}`);
-      
+
       const tool = this.tools.get(name);
       if (!tool) {
         throw new McpError(
@@ -106,7 +106,7 @@ export class GitForMeDearAiServer {
       logger.info(`  📁 ${tool.name} - ${tool.description}`);
     });
 
-    // Status & Inspection Tools  
+    // Status & Inspection Tools
     const statusTools = new StatusTools();
     statusTools.getTools().forEach((tool) => {
       this.tools.set(tool.name, tool);
@@ -132,11 +132,11 @@ export class GitForMeDearAiServer {
 
   public async start(): Promise<void> {
     const transport = new StdioServerTransport();
-    
+
     logger.info(chalk.green('🚀 Starting GitForMeDearAi MCP Server...'));
     logger.info(`📁 Working directory: ${this.context.workingDirectory}`);
     logger.info(`🔧 Tools registered: ${this.tools.size}`);
-    
+
     if (this.context.github) {
       logger.info('🐙 GitHub integration enabled');
     } else {
@@ -144,7 +144,9 @@ export class GitForMeDearAiServer {
     }
 
     await this.server.connect(transport);
-    logger.info(chalk.green('✅ GitForMeDearAi MCP Server started successfully!'));
+    logger.info(
+      chalk.green('✅ GitForMeDearAi MCP Server started successfully!')
+    );
   }
 
   public async stop(): Promise<void> {
