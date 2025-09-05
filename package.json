@@ -1,0 +1,76 @@
+{
+  "name": "git-for-me-dear-ai",
+  "version": "0.1.0",
+  "description": "Complete MCP server for Git and GitHub automation - installable globally with npm",
+  "keywords": [
+    "git",
+    "github",
+    "mcp",
+    "automation",
+    "cli",
+    "version-control",
+    "workflow"
+  ],
+  "author": "GitForMeDearAi Team",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "bin": {
+    "git-for-me-dear-ai": "dist/cli.js"
+  },
+  "preferGlobal": true,
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "ROADMAP.md"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts,.js",
+    "lint:fix": "eslint src --ext .ts,.js --fix",
+    "format": "prettier --write 'src/**/*.{ts,js,json}'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "release": "npm run build && npm publish"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "@octokit/rest": "^20.0.2",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "simple-git": "^3.20.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.0",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.4.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bramato/git-for-me-dear-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bramato/git-for-me-dear-ai/issues"
+  },
+  "homepage": "https://github.com/bramato/git-for-me-dear-ai#readme"
+}
