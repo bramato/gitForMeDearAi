@@ -1,6 +1,6 @@
 {
   "name": "git-for-me-dear-ai",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Complete MCP server for Git and GitHub automation - installable globally with npm",
   "keywords": [
