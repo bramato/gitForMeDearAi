@@ -9,8 +9,11 @@ export enum LogLevel {
 
 class Logger {
   private level: LogLevel;
+  private mcpMode: boolean;
 
   constructor() {
+    this.mcpMode = process.env.MCP_MODE === 'true';
+    
     const envLevel = process.env.LOG_LEVEL?.toUpperCase();
     switch (envLevel) {
       case 'ERROR':
@@ -49,35 +52,41 @@ class Logger {
   }
 
   error(message: string, ...args: any[]): void {
-    if (this.level >= LogLevel.ERROR) {
+    // Check MCP mode dynamically
+    const mcpMode = process.env.MCP_MODE === 'true' || !process.stdin.isTTY;
+    if (!mcpMode && this.level >= LogLevel.ERROR) {
       const formatted = this.formatMessage('ERROR', message, ...args);
       console.error(chalk.red(formatted));
     }
   }
 
   warn(message: string, ...args: any[]): void {
-    if (this.level >= LogLevel.WARN) {
+    const mcpMode = process.env.MCP_MODE === 'true' || !process.stdin.isTTY;
+    if (!mcpMode && this.level >= LogLevel.WARN) {
       const formatted = this.formatMessage('WARN', message, ...args);
       console.warn(chalk.yellow(formatted));
     }
   }
 
   info(message: string, ...args: any[]): void {
-    if (this.level >= LogLevel.INFO) {
+    const mcpMode = process.env.MCP_MODE === 'true' || !process.stdin.isTTY;
+    if (!mcpMode && this.level >= LogLevel.INFO) {
       const formatted = this.formatMessage('INFO', message, ...args);
       console.info(chalk.blue(formatted));
     }
   }
 
   debug(message: string, ...args: any[]): void {
-    if (this.level >= LogLevel.DEBUG) {
+    const mcpMode = process.env.MCP_MODE === 'true' || !process.stdin.isTTY;
+    if (!mcpMode && this.level >= LogLevel.DEBUG) {
       const formatted = this.formatMessage('DEBUG', message, ...args);
       console.debug(chalk.gray(formatted));
     }
   }
 
   success(message: string, ...args: any[]): void {
-    if (this.level >= LogLevel.INFO) {
+    const mcpMode = process.env.MCP_MODE === 'true' || !process.stdin.isTTY;
+    if (!mcpMode && this.level >= LogLevel.INFO) {
       const formatted = this.formatMessage('SUCCESS', message, ...args);
       console.info(chalk.green(formatted));
     }

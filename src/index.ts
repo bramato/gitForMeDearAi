@@ -6,6 +6,10 @@ import chalk from 'chalk';
 
 async function main(): Promise<void> {
   try {
+    // Set MCP mode before logger initialization if running as MCP server
+    if (process.stdin.isTTY === false) {
+      process.env.MCP_MODE = 'true';
+    }
     // Set up process handlers
     process.on('SIGINT', async () => {
       logger.info('🛑 Received SIGINT, shutting down gracefully...');
@@ -27,15 +31,18 @@ async function main(): Promise<void> {
       process.exit(1);
     });
 
-    // Display startup banner
-    console.log(
-      chalk.blue.bold(`
+    // Display startup banner only if not in MCP mode
+    const mcpMode = process.env.MCP_MODE === 'true' || !process.stdin.isTTY;
+    if (!mcpMode) {
+      console.log(
+        chalk.blue.bold(`
 ╔══════════════════════════════════════╗
 ║        GitForMeDearAi v0.1.0         ║
 ║    Complete Git/GitHub MCP Server    ║
 ╚══════════════════════════════════════╝
 `)
-    );
+      );
+    }
 
     // Create and start server
     const server = new GitForMeDearAiServer();

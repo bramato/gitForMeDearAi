@@ -1,5 +1,11 @@
 # 🎯 GitForMeDearAi
 
+```
+┏┓• ┏┓    ┳┳┓  ┳┓      ┏┓•
+┃┓┓╋┣ ┏┓┏┓┃┃┃┏┓┃┃┏┓┏┓┏┓┣┫┓
+┗┛┗┗┻ ┗┛┛ ┛ ┗┗ ┻┛┗ ┗┻┛ ┛┗┗
+```
+
 > A complete MCP (Model Context Protocol) server for automating all Git and GitHub commands, globally installable via npm.
 
 ## 🌟 Overview

@@ -85,7 +85,16 @@ export class GitForMeDearAiServer {
       try {
         const result = await tool.execute(this.context, args);
         logger.info(`✅ Tool '${name}' executed successfully`);
-        return result;
+        
+        // Return proper MCP format
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2)
+            }
+          ]
+        };
       } catch (error) {
         logger.error(`❌ Tool '${name}' failed:`, error);
         throw new McpError(
